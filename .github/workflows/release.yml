@@ -1,0 +1,27 @@
+---
+name: Release docker image
+on:
+  workflow_dispatch:
+    inputs:
+      release-type:
+        required: true
+        type: choice
+        options:
+          - "GA"
+          - "RC"
+        default: "GA"
+        description: General Availability or Release Candidate
+jobs:
+  release:
+    uses: ixxeL-DevOps/gha-templates/.github/workflows/__docker-release__.yaml@main
+    with:
+      workingdir: .
+      img-name: demo-web
+      cache-registry: docker.io/ixxel
+      registry-url: docker.io
+      registry-username: ${{ vars.DOCKER_HUB_USER }}
+      publish: "true"
+      prerelease: "${{ inputs.release-type == 'RC' }}"
+    secrets:
+      git-token: ${{ secrets.PAT }}
+      registry-password: ${{ secrets.DOCKER_IO_PWD }}

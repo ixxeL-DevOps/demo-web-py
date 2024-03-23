@@ -1,0 +1,24 @@
+---
+name: CI
+on:
+  push:
+    branches:
+      - "main"
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    branches:
+      - "main"
+  workflow_dispatch:
+jobs:
+  demo-web:
+    uses: ixxeL-DevOps/gha-templates/.github/workflows/docker-build.yaml@main
+    with:
+      workingdir: .
+      img-name: demo-web
+      registry-username: ${{ vars.DOCKER_HUB_USER }}
+    secrets:
+      git-token: ${{ secrets.PAT }}
+      DOCKER_IO_PWD: ${{ secrets.DOCKER_IO_PWD }}
