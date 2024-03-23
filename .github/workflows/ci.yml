@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
 jobs:
   demo-web:
-    uses: ixxeL-DevOps/gha-templates/.github/workflows/docker-build.yaml@main
+    uses: ixxeL-DevOps/gha-templates/.github/workflows/docker-build-app.yaml@main
     with:
       workingdir: app
       img-name: demo-web
