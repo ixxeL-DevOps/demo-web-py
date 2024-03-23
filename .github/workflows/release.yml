@@ -15,7 +15,7 @@ jobs:
   release:
     uses: ixxeL-DevOps/gha-templates/.github/workflows/__docker-release__.yaml@main
     with:
-      workingdir: .
+      workingdir: app
       img-name: demo-web
       cache-registry: docker.io/ixxel
       registry-url: docker.io

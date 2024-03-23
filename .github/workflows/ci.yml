@@ -16,7 +16,7 @@ jobs:
   demo-web:
     uses: ixxeL-DevOps/gha-templates/.github/workflows/docker-build.yaml@main
     with:
-      workingdir: .
+      workingdir: app
       img-name: demo-web
       registry-username: ${{ vars.DOCKER_HUB_USER }}
     secrets:
