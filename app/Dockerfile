@@ -4,7 +4,7 @@ LABEL maintainer="fredspiers@gmail.com"
 LABEL org.opencontainers.image.authors="F.SPIERS"
 LABEL org.opencontainers.image.base.name="python:3.12-alpine3.19" 
 
-ENV TZ="Europe/Paris"
+ENV TZ="Europe/Paris" 
 
 RUN --mount=type=cache,target=/var/cache/apk \
     apk update --no-cache && \
