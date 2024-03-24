@@ -10,11 +10,12 @@ spec:
     spec:
       containers:
       - name: e2e-tests
-        image: curlimages/curl
+        image: alpine
         command:
           - "/bin/bash"
           - "-c"
           - |
+            apk add curl bash
             response_code=$(curl -s -o /dev/null -w "%{http_code}" "https://{{ .Values.name }}.{{ .Release.Namespace}}.svc.cluster.local:8080")
             if [ $response_code -eq 200 ]; then
               echo "SUCCESS : response code is $response_code"
