@@ -9,6 +9,6 @@ spec:
     app: {{ .Values.name }}
   ports:
   - protocol: TCP
-    port: 808
+    port: 8080
     targetPort: 8080
     name: http
