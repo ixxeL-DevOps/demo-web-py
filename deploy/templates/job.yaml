@@ -12,7 +12,7 @@ spec:
       - name: e2e-tests
         image: alpine
         command:
-          - "/bin/bash"
+          - "/bin/sh"
           - "-c"
           - |
             apk add curl bash
