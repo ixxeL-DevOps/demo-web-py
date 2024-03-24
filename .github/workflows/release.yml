@@ -13,14 +13,13 @@ on:
         description: General Availability or Release Candidate
 jobs:
   release:
-    uses: ixxeL-DevOps/gha-templates/.github/workflows/__docker-release__.yaml@main
+    uses: ixxeL-DevOps/gha-templates/.github/workflows/docker-release-app.yaml@main
     with:
       workingdir: app
       img-name: demo-web
       cache-registry: docker.io/ixxel
       registry-url: docker.io
       registry-username: ${{ vars.DOCKER_HUB_USER }}
-      publish: "true"
       prerelease: "${{ inputs.release-type == 'RC' }}"
     secrets:
       git-token: ${{ secrets.PAT }}
