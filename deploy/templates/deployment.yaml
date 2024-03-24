@@ -15,6 +15,7 @@ spec:
     spec:
       containers:
       - name: {{ .Values.name }}
+        imagePullPolicy: Always
         image: ixxel/demo-web:{{ .Values.tag }}
         resources:
           requests:
@@ -22,6 +23,6 @@ spec:
             cpu: "100m"
           limits:
             memory: "256Mi"
-            cpu: "250m"
+            cpu: "300m"
         ports:
         - containerPort: 8080
