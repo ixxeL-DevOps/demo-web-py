@@ -56,7 +56,7 @@ Documentation :
 - https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/templates/
 
 
-Here is the description of the ArgoCD `ApplicationSet` responsible for app creation:
+Here is the description of the ArgoCD `ApplicationSet` responsible for app creation (works with umbrella chart in this example):
 ```yaml
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -92,9 +92,9 @@ spec:
         helm:
           releaseName: 'demo-web-pr-{{number}}'
           parameters:
-            - name: tag
+            - name: demo-web.tag
               value: 'sha-{{head_sha}}'
-            - name: name
+            - name: demo-web.name
               value: 'demo-web-pr-{{number}}'
       syncPolicy:
         automated:
@@ -117,7 +117,6 @@ spec:
       info:
       - name: url
         value: 'https://demo-web-pr-{{number}}.k8s-app.fredcorp.com/'
-
 ```
 
 Notice the annotation for webhook callback to Github:
