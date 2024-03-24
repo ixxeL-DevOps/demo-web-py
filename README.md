@@ -116,12 +116,26 @@ spec:
             duration: 5s # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
             factor: 2 # a factor to multiply the base duration after each failed retry
             maxDuration: 3m # the maximum amount of time allowed for the backoff strategy
+        managedNamespaceMetadata:
+          labels:
+            argocd.argoproj.io/instance: 'demo-web-pr-{{number}}'
+          annotations:
+            argocd.argoproj.io/tracking-id: >-
+              demo-web-pr-{{number}}:/Namespace:demo-web-pr-{{number}}/demo-web-pr-{{number}}
       info:
       - name: url
         value: 'https://demo-web-pr-{{number}}.k8s-app.fredcorp.com/'
 ```
-
-Notice the `demo-web.pr.enabled` useful and coupled with `Namespace` resource to allow automatic namespace deletion after PR close/merge:
+Notice the section `managedNamespaceMetadata` which is very useful to enable automatic namespace deletion after PR close/merge:
+```yaml
+managedNamespaceMetadata:
+  labels:
+    argocd.argoproj.io/instance: 'demo-web-pr-{{number}}'
+  annotations:
+    argocd.argoproj.io/tracking-id: >-
+      demo-web-pr-{{number}}:/Namespace:demo-web-pr-{{number}}/demo-web-pr-{{number}}
+```
+If you do not use this section, you need to inject the `Namespace` resource inside the helm chart:
 ```yaml
 {{- if .Values.pr.enabled}}
 apiVersion: v1
