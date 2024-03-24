@@ -269,12 +269,14 @@ spec:
     spec:
       containers:
       - name: e2e-tests
-        image: curlimages/curl
+        image: alpine
         command:
-          - "/bin/sh"
+          - "/bin/bash"
           - "-c"
           - |
-            response_code=$(curl -s -o /dev/null -w "%{http_code}" "https://{{ .Values.name }}.{{ .Release.Namespace}}.svc.cluster.local:8080")
+            apk add curl bash
+            response_code=$(curl -fsSkLw "%{http_code}" "http://{{ .Values.name }}.{{ .Release.Namespace}}.svc.cluster.local:8080" -o /dev/null)
+            echo "Response code is $response_code"
             if [ $response_code -eq 200 ]; then
               echo "SUCCESS : response code is $response_code"
               exit 0
@@ -284,8 +286,22 @@ spec:
             fi
       restartPolicy: Never
   backoffLimit: 0
-  ttlSecondsAfterFinished: 600
-  activeDeadlineSeconds: 120
 ```
 
 Job will be launched after app is sync.
+
+```
+
+Job will be launched after app is sync.
+
+## Trigger
+
+Github action let you triggers workflow manually. It can be coupled with ArgoCD notification.
+
+Documentation:
+- https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28
+
+```bash
+curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer <YOUR-TOKEN>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/OWNER/REPO/actions/workflows/WORKFLOW_ID/dispatches -d '{"ref":"topic-branch","inputs":{"name":"Mona the Octocat","home":"San Francisco, CA"}}'
+```
+
