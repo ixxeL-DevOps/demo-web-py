@@ -78,6 +78,8 @@ spec:
       name: 'demo-web-pr-{{number}}'
       annotations:
         notifications.argoproj.io/subscribe.on-deployed.github: ""
+        notifications.argoproj.io/subscribe.on-health-degraded.github: ""
+        notifications.argoproj.io/subscribe.on-sync-failed.github: ""
     spec:
       destination:
         namespace: 'demo-web-pr-{{number}}'
@@ -106,15 +108,24 @@ spec:
           - ApplyOutOfSyncOnly=true
           - CreateNamespace=true
           - ServerSideApply=true
+        retry:
+          limit: 2 # number of failed sync attempt retries; unlimited number of attempts if less than 0
+          backoff:
+            duration: 5s # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+            factor: 2 # a factor to multiply the base duration after each failed retry
+            maxDuration: 3m # the maximum amount of time allowed for the backoff strategy
       info:
       - name: url
         value: 'https://demo-web-pr-{{number}}.k8s-app.fredcorp.com/'
+
 ```
 
 Notice the annotation for webhook callback to Github:
 ```yaml
 annotations:
   notifications.argoproj.io/subscribe.on-deployed.github: ""
+  notifications.argoproj.io/subscribe.on-health-degraded.github: ""
+  notifications.argoproj.io/subscribe.on-sync-failed.github: ""
 ```
 
 And here is the configuration for ArgoCD:
@@ -137,6 +148,18 @@ triggers:
       send:
       - github-commit-status
       when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy' and app.status.sync.status == 'Synced'
+  trigger.on-health-degraded: |
+    - description: Application has degraded
+      oncePer: app.status.operationState.syncResult.revision
+      send:
+      - github-commit-status
+      when: app.status.health.status == 'Degraded'
+  trigger.on-sync-failed: |
+    - description: Application syncing has failed
+      oncePer: app.status.operationState.syncResult.revision
+      send:
+      - github-commit-status
+      when: app.status.operationState.phase in ['Error', 'Failed']
 
 templates:
   template.github-commit-status: |
@@ -228,3 +251,41 @@ templates:
             "context": "continuous-integration/argocd"
           }
 ```
+
+## Testing 
+
+You can test application with a postsync hook. Add this job to the helm chart:
+
+```yaml
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: e2e-tests-
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+spec:
+  template:
+    spec:
+      containers:
+      - name: e2e-tests
+        image: curlimages/curl
+        command:
+          - "/bin/sh"
+          - "-c"
+          - |
+            response_code=$(curl -s -o /dev/null -w "%{http_code}" "https://{{ .Values.name }}.{{ .Release.Namespace}}.svc.cluster.local:8080")
+            if [ $response_code -eq 200 ]; then
+              echo "SUCCESS : response code is $response_code"
+              exit 0
+            else
+              echo "FAIL : response code is $response_code"
+              exit 1
+            fi
+      restartPolicy: Never
+  backoffLimit: 0
+  ttlSecondsAfterFinished: 600
+  activeDeadlineSeconds: 120
+```
+
+Job will be launched after app is sync.
