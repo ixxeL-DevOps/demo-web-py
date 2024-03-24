@@ -77,7 +77,9 @@ spec:
     metadata:
       name: 'demo-web-pr-{{number}}'
       annotations:
-        notifications.argoproj.io/subscribe.on-deployed.github: ""
+        notifications.argoproj.io/subscribe.on-ephemeral-deployed.github: ""
+        notifications.argoproj.io/subscribe.on-ephemeral-health-degraded.github: ""
+        notifications.argoproj.io/subscribe.on-ephemeral-sync-failed.github: ""
     spec:
       destination:
         namespace: 'demo-web-pr-{{number}}'
@@ -106,15 +108,24 @@ spec:
           - ApplyOutOfSyncOnly=true
           - CreateNamespace=true
           - ServerSideApply=true
+        retry:
+          limit: 2 # number of failed sync attempt retries; unlimited number of attempts if less than 0
+          backoff:
+            duration: 5s # the amount to back off. Default unit is seconds, but could also be a duration (e.g. "2m", "1h")
+            factor: 2 # a factor to multiply the base duration after each failed retry
+            maxDuration: 3m # the maximum amount of time allowed for the backoff strategy
       info:
       - name: url
         value: 'https://demo-web-pr-{{number}}.k8s-app.fredcorp.com/'
+
 ```
 
 Notice the annotation for webhook callback to Github:
 ```yaml
 annotations:
-  notifications.argoproj.io/subscribe.on-deployed.github: ""
+  notifications.argoproj.io/subscribe.on-ephemeral-deployed.github: ""
+  notifications.argoproj.io/subscribe.on-ephemeral-health-degraded.github: ""
+  notifications.argoproj.io/subscribe.on-ephemeral-sync-failed.github: ""
 ```
 
 And here is the configuration for ArgoCD:
@@ -131,12 +142,24 @@ notifiers:
       value: token $password
 
 triggers:
-  trigger.on-deployed: |
+  trigger.on-ephemeral-deployed: |
     - description: Application is synced and healthy. Triggered once per commit.
       oncePer: app.status.operationState.syncResult.revision
       send:
       - github-commit-status
       when: app.status.operationState.phase in ['Succeeded'] and app.status.health.status == 'Healthy' and app.status.sync.status == 'Synced'
+  trigger.on-ephemeral-health-degraded: |
+    - description: Application has degraded
+      oncePer: app.status.operationState.syncResult.revision
+      send:
+      - github-commit-status
+      when: app.status.health.status == 'Degraded'
+  trigger.on-ephemeral-sync-failed: |
+    - description: Application syncing has failed
+      oncePer: app.status.operationState.syncResult.revision
+      send:
+      - github-commit-status
+      when: app.status.operationState.phase in ['Error', 'Failed']
 
 templates:
   template.github-commit-status: |
@@ -227,4 +250,53 @@ templates:
             "target_url": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
             "context": "continuous-integration/argocd"
           }
+```
+
+## Testing 
+
+You can test application with a postsync hook. Add this job to the helm chart:
+
+```yaml
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  generateName: e2e-tests-
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+spec:
+  template:
+    spec:
+      containers:
+      - name: e2e-tests
+        image: alpine
+        command:
+          - "/bin/bash"
+          - "-c"
+          - |
+            apk add curl bash
+            response_code=$(curl -fsSkLw "%{http_code}" "http://{{ .Values.name }}.{{ .Release.Namespace}}.svc.cluster.local:8080" -o /dev/null)
+            echo "Response code is $response_code"
+            if [ $response_code -eq 200 ]; then
+              echo "SUCCESS : response code is $response_code"
+              exit 0
+            else
+              echo "FAIL : response code is $response_code"
+              exit 1
+            fi
+      restartPolicy: Never
+  backoffLimit: 0
+```
+
+Job will be launched after app is sync.
+
+## Trigger
+
+Github action let you triggers workflow manually. It can be coupled with ArgoCD notification.
+
+Documentation:
+- https://docs.github.com/en/rest/actions/workflows?apiVersion=2022-11-28
+
+```bash
+curl -L -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer <YOUR-TOKEN>" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/OWNER/REPO/actions/workflows/WORKFLOW_ID/dispatches -d '{"ref":"topic-branch","inputs":{"name":"Mona the Octocat","home":"San Francisco, CA"}}'
 ```
