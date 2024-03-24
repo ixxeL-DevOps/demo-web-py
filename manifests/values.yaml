@@ -1,2 +1,4 @@
 name: demo-web
 tag: latest
+pr:
+  enabled: false
