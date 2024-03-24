@@ -12,10 +12,10 @@ spec:
       - name: e2e-tests
         image: alpine
         command:
-          - "/bin/bash"
+          - "/bin/sh"
           - "-c"
           - |
-            apk add curl bash
+            apk add curl
             response_code=$(curl -fsSkLw "%{http_code}" "http://{{ .Values.name }}.{{ .Release.Namespace}}.svc.cluster.local:8080" -o /dev/null)
             echo "Response code is $response_code"
             if [ $response_code -eq 200 ]; then
