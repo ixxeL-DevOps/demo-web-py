@@ -16,7 +16,7 @@ spec:
           - "-c"
           - |
             apk add curl bash
-            response_code=$(curl -fsSkLw "%{http_code}" "https://{{ .Values.name }}.{{ .Release.Namespace}}.svc.cluster.local:8080 -o /dev/null")
+            response_code=$(curl -fsSkLw "%{http_code}" "https://{{ .Values.name }}.{{ .Release.Namespace}}.svc.cluster.local:8080" -o /dev/null)
             echo "Response code is $response_code"
             if [ $response_code -eq 200 ]; then
               echo "SUCCESS : response code is $response_code"
