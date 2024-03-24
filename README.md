@@ -96,6 +96,8 @@ spec:
               value: 'sha-{{head_sha}}'
             - name: demo-web.name
               value: 'demo-web-pr-{{number}}'
+            - name: demo-web.pr.enabled
+              value: 'true'
       syncPolicy:
         automated:
           prune: true
@@ -117,6 +119,16 @@ spec:
       info:
       - name: url
         value: 'https://demo-web-pr-{{number}}.k8s-app.fredcorp.com/'
+```
+
+Notice the `demo-web.pr.enabled` useful and coupled with `Namespace` resource to allow automatic namespace deletion after PR close/merge:
+```yaml
+{{- if .Values.pr.enabled}}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.name }}
+{{- end }}
 ```
 
 Notice the annotation for webhook callback to Github:
