@@ -50,7 +50,7 @@ curl -L -H "Accept: application/vnd.github+json" -H "Authorization: Bearer <YOUR
 Documentation:
 - https://docs.github.com/en/rest/commits/statuses?apiVersion=2022-11-28
 
-## ArgoCD config
+## ArgoCD deployment config
 
 Documentation :
 - https://argo-cd.readthedocs.io/en/stable/operator-manual/notifications/templates/
@@ -173,11 +173,30 @@ templates:
             {{if eq .app.status.operationState.phase "Succeeded"}} "state": "success"{{end}}
             {{if eq .app.status.operationState.phase "Error"}} "state": "error"{{end}}
             {{if eq .app.status.operationState.phase "Failed"}} "state": "error"{{end}},
-            "description": "{{.app.metadata.name}} img tag: {{ (call .repo.GetAppDetails).Helm.GetParameterValueByName "tag" }}",
+            "description": "{{.app.metadata.name}} img tag: {{.app.status.operationState.operation.sync.revision}}",
             "target_url": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
             "context": "continuous-integration/argocd"
           }
 ```
+
+`ApplicationSet` points to the repository where the code lives. You can use an umbrella chart to automatically pull the latest version of the deployment in the `deploy` directory:
+```yaml
+apiVersion: v2
+name: demo-web
+version: 1.0.0
+dependencies:
+- name: demo-web
+  version: '*'
+  repository: https://chartmuseum.k8s-app.fredcorp.com
+```
+
+see the helm version constraints documentation:
+- https://github.com/Masterminds/semver#checking-version-constraints
+
+
+This setup allows for `{{.app.status.operationState.operation.sync.revision}}` usage when setting `targetRevision: '{{branch}}'` for the ApplicationSet.
+
+If you prefer not to, you can use specific `{{ (call .repo.GetAppDetails).Helm.GetParameterValueByName "tag" }}` call function to target a Helm parameter from your release.
 
 Argocd display application information:
 ```bash
