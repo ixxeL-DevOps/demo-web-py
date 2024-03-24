@@ -1,4 +1,4 @@
-FROM python:3.12-alpine3.19
+FROM python:3.12-alpine3.19 
 
 LABEL maintainer="fredspiers@gmail.com"
 LABEL org.opencontainers.image.authors="F.SPIERS"
