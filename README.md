@@ -195,3 +195,36 @@ GROUP              KIND        NAMESPACE      NAME           STATUS   HEALTH   H
 apps               Deployment  demo-web-pr-5  demo-web-pr-5  Synced   Healthy        deployment.apps/demo-web-pr-5 serverside-applied
 networking.k8s.io  Ingress     demo-web-pr-5  demo-web-pr-5  Synced   Healthy        ingress.networking.k8s.io/demo-web-pr-5 serverside-applied
 ```
+
+The line :
+```
+"description": "{{.app.metadata.name}} img tag: {{ (call .repo.GetAppDetails).Helm.GetParameterValueByName "tag" }}",
+```
+
+Reference :
+```
+NAME  VALUE
+tag   sha-d751238e003a92968e2276456f2e0e3ac2ba7216
+```
+
+You can also gather the commit sha within helm parameter and adapt it:
+
+```yaml
+templates:
+  template.github-commit-status: |
+    webhook:
+      github:
+        method: POST
+        {{ $sha := (split "-" ((call .repo.GetAppDetails).Helm.GetParameterValueByName "tag"))._1 }}
+        path: /repos/{{call .repo.FullNameByRepoURL .app.spec.source.repoURL}}/statuses/{{ $sha }}
+        body: |
+          {
+            {{if eq .app.status.operationState.phase "Running"}} "state": "pending"{{end}}
+            {{if eq .app.status.operationState.phase "Succeeded"}} "state": "success"{{end}}
+            {{if eq .app.status.operationState.phase "Error"}} "state": "error"{{end}}
+            {{if eq .app.status.operationState.phase "Failed"}} "state": "error"{{end}},
+            "description": "{{.app.metadata.name}} img tag: {{ (call .repo.GetAppDetails).Helm.GetParameterValueByName "tag" }}",
+            "target_url": "{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+            "context": "continuous-integration/argocd"
+          }
+```
