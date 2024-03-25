@@ -9,7 +9,7 @@ ENV TZ="Europe/Paris"
 RUN --mount=type=cache,target=/var/cache/apk \
     apk update --no-cache && \ 
     apk upgrade --no-cache && \
-    apk add --no-cache --update \
+    apk add --no-cache --update \ 
     build-base \
     libressl-dev \
     musl-dev \
