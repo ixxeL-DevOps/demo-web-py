@@ -7,7 +7,7 @@ LABEL org.opencontainers.image.base.name="python:3.12-alpine3.19"
 ENV TZ="Europe/Paris" 
 
 RUN --mount=type=cache,target=/var/cache/apk \
-    apk update --no-cache && \ 
+    apk update --no-cache && \  
     apk upgrade --no-cache && \
     apk add --no-cache --update \ 
     build-base \
