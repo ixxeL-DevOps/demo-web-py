@@ -1,3 +1,4 @@
+{{- if .Values.test.enabled }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -27,3 +28,4 @@ spec:
             fi
       restartPolicy: Never
   backoffLimit: 0
+{{- end }}

@@ -1,4 +1,4 @@
 name: demo-web
 tag: latest
-pr:
+test:
   enabled: false
