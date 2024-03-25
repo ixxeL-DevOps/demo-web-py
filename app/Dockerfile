@@ -1,6 +1,6 @@
 FROM python:3.12-alpine3.19 
 
-LABEL maintainer="fredspiers@gmail.com"
+LABEL maintainer="fredspiers@gmail.com" 
 LABEL org.opencontainers.image.authors="F.SPIERS"  
 LABEL org.opencontainers.image.base.name="python:3.12-alpine3.19" 
 
