@@ -1,3 +1,5 @@
 demo-web:
   name: demo-web
   tag: latest
+  test: 
+    enabled: true
