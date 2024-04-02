@@ -4,12 +4,12 @@ kind: Ingress
 metadata:
   annotations:
     cert-manager.io/cluster-issuer: vault-issuer
-    cert-manager.io/common-name: {{ .Values.name }}.k8s-app.fredcorp.com
+    cert-manager.io/common-name: {{ .Values.name }}.{{ .Values.domainName }}
   name: {{ .Values.name }}
 spec:
-  ingressClassName: nginx
+  ingressClassName: {{ default "nginx" .Values.ingressClassname }}
   rules:
-  - host: {{ .Values.name }}.k8s-app.fredcorp.com
+  - host: {{ .Values.name }}.{{ .Values.domainName }}
     http:
       paths:
       - backend:
@@ -18,8 +18,8 @@ spec:
             port:
               number: 8080
         path: /
-        pathType: ImplementationSpecific
+        pathType: Prefix
   tls:
   - hosts:
-    - {{ .Values.name }}.k8s-app.fredcorp.com
+    - {{ .Values.name }}.{{ .Values.domainName }}
     secretName: {{ .Values.name }}

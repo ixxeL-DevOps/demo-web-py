@@ -1,4 +1,6 @@
 name: demo-web
 tag: latest
+ingressClassname: cilium
+domainName: k8s-app.fredcorp.com
 test:
   enabled: false
