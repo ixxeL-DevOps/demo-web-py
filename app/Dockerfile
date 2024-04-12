@@ -15,7 +15,7 @@ RUN --mount=type=cache,target=/var/cache/apk \
     musl-dev \
     libffi-dev    
 
-WORKDIR /app
+WORKDIR /app 
 
 COPY . .
 
