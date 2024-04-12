@@ -1,16 +1,9 @@
 demo-web:
-  fullnameOverride: demo-web
   image:
     registry: docker.io
     repository: ixxel/demo-web
-    tag: latest
   ingress:
     enabled: true
     className: "cilium"
-    annotations:
-      cert-manager.io/cluster-issuer: vault-issuer
-      cert-manager.io/common-name: k8s-app.fredcorp.com
-    hosts:
-      - host: k8s-app.fredcorp.com
   test: 
     enabled: true
