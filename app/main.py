@@ -7,7 +7,7 @@ app = FastAPI()
 # Définir une route pour gérer les requêtes GET sur '/'
 @app.get("/")
 async def read_root():
-    return {"message": "Bienvenue sur le serveur web NEW !"}
+    return {"message": "Bienvenue sur le serveur web FIXED ROLLOUT !"}
 
 if __name__ == "__main__":
     config = uvicorn.Config(app, port=8080, log_level="info")
