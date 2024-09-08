@@ -20,5 +20,5 @@ jobs:
       img-name: demo-web
       registry-username: ${{ vars.DOCKER_HUB_USER }}
     secrets:
-      git-token: ${{ secrets.PAT }}
+      git-token: ${{ secrets.SUPER_ADMIN_TOKEN }}
       DOCKER_IO_PWD: ${{ secrets.DOCKER_IO_PWD }}

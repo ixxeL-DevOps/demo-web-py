@@ -22,5 +22,5 @@ jobs:
       registry-username: ${{ vars.DOCKER_HUB_USER }}
       prerelease: "${{ inputs.release-type == 'RC' }}"
     secrets:
-      git-token: ${{ secrets.PAT }}
+      git-token: ${{ secrets.SUPER_ADMIN_TOKEN }}
       registry-password: ${{ secrets.DOCKER_IO_PWD }}
