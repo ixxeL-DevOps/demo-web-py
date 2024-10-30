@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 
 # Créer une instance de l'application FastAPI
-app = FastAPI()
+app = FastAPI() 
 
 # Définir une route pour gérer les requêtes GET sur '/'
 @app.get("/")
