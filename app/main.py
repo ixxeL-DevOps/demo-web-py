@@ -7,7 +7,7 @@ app = FastAPI()
 # Définir une route pour gérer les requêtes GET sur '/'
 @app.get("/")
 async def read_root():
-    return {"message": "Testing promote img! rocket"} 
+    return {"message": "Testing promote img! rocket 2"} 
 
 if __name__ == "__main__":
     config = uvicorn.Config(app, port=8080, log_level="info")
